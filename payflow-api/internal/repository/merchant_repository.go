@@ -9,10 +9,10 @@ import (
 	"payflow/internal/model"
 )
 type MerchantRepository struct {
-	db *sql.DB
+	db DBExecutor
 }
 
-func NewMerchantRepository(db *sql.DB) *MerchantRepository {
+func NewMerchantRepository(db DBExecutor) *MerchantRepository {
 	return &MerchantRepository{
 		db:db,
 	}
