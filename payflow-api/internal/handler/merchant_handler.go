@@ -3,9 +3,11 @@ package handler
 import (
 	"net/http"
 	"uuid"
+	"errors"
 
 	"payflow/internal/model"
 	"payflow/internal/service"
+	"payflow/internal/repository"
 
 	"github.com/gin-gonic/gin"
 )
@@ -65,12 +67,13 @@ func (h *MerchantHandler) GetByID(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{
 			"error": "Invalid UUID format",
 		})
+		return
 	}
 
 	merchant, err := h.service.GetByID(id)
 
 	if err != nil {
-		if err.Error() == "merchant not found" {
+		if errors.Is(err, repository.ErrMerchantNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -105,7 +108,7 @@ func (h *MerchantHandler) Update(c *gin.Context) {
 	err = c.ShouldBindJSON(&req)
 
 	if err != nil {
-		if err.Error() == "merchant not found" {
+		if errors.Is(err, repository.ErrMerchantNotFound) {
 			c.JSON(http.StatusBadRequest, gin.H{
 				"error": err.Error(),
 			})
@@ -146,7 +149,7 @@ func (h *MerchantHandler) Delete(c *gin.Context) {
 	err = h.service.Delete(deleteId)
 
 	if err != nil {
-		if err.Error() == "merchant not found" {
+		if errors.Is(err, repository.ErrMerchantNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -179,7 +182,7 @@ func (h *MerchantHandler) Activate(c *gin.Context) {
 	err = h.service.Activate(activateId)
 
 	if err != nil {
-		if err.Error() == "merchant not found" {
+		if errors.Is(err, repository.ErrMerchantNotFound) {
 			c.JSON(http.StatusNotFound, gin.H{
 				"error": err.Error(),
 			})
@@ -191,7 +194,7 @@ func (h *MerchantHandler) Activate(c *gin.Context) {
 		return
 	}
 
-	c.JSON(http.StatusOK, gin.H {
+	c.JSON(http.StatusOK, gin.H{
 		"data": "merchant status activated successfully!",
 	})
 

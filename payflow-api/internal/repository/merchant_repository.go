@@ -4,6 +4,7 @@ import (
 	"database/sql"
 	"errors"
 	"uuid"
+	"fmt"
 
 	"payflow/internal/model"
 )
@@ -84,7 +85,7 @@ func (r *MerchantRepository) Create(req model.Merchant) (model.Merchant, error) 
 	).Scan(&req.Status)
 
 	if err != nil {
-		return model.Merchant{}, err
+		return model.Merchant{}, fmt.Errorf("create merchant: %w", err)
 	}
 
 	return req, nil
@@ -114,9 +115,9 @@ func (r *MerchantRepository) GetByID(id uuid.UUID) (model.Merchant, error) {
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
-			return model.Merchant{}, errors.New("merchant not found")
+			return model.Merchant{}, ErrMerchantNotFound
 		}
-		return model.Merchant{}, err
+		return model.Merchant{}, fmt.Errorf("get merchant: %w", err)
 	}
 	
 	return merchant, nil
@@ -140,18 +141,18 @@ func (r *MerchantRepository) Update(merchant model.Merchant) (model.Merchant, er
 	)
 
 	if err != nil {
-		return model.Merchant{}, err
+		return model.Merchant{}, fmt.Errorf("update merchant: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected(); 
 
 	if err != nil {
-		return model.Merchant{}, err
+		return model.Merchant{}, fmt.Errorf("update merchant: %w", err)
 	}
 
 	
 	if rowsAffected == 0 {
-		return model.Merchant{}, errors.New("merchant not found")
+		return model.Merchant{}, ErrMerchantNotFound
 	}
 
 	return merchant, nil
@@ -167,16 +168,16 @@ func (r *MerchantRepository) Delete(id uuid.UUID) error {
 	result, err := r.db.Exec(query, id)
 
 	if err != nil {
-		return err
+		return fmt.Errorf("deactivate merchant: %w", err)
 	}
 
     rowsAffected, err := result.RowsAffected();
 	if err != nil {
-		return err
+		return fmt.Errorf("deactivate merchant: %w", err)
 	}
 
 	if rowsAffected == 0 { 
-		return errors.New("merchant not found")
+		return ErrMerchantNotFound
 	}
 
 	return nil
@@ -193,17 +194,17 @@ func (r *MerchantRepository) Activate(id uuid.UUID) error {
 	result, err := r.db.Exec(query,id)
 
 	if err != nil {
-		return  err
+		return  fmt.Errorf("activate merchant: %w", err)
 	}
 
 	rowsAffected, err := result.RowsAffected() 
 
 	if err != nil {
-		return err
+		return fmt.Errorf("activate merchant: %w", err)
 	}
 
 	if rowsAffected == 0 { 
-		return errors.New("merchant not found")
+		return ErrMerchantNotFound
 	}
 
 	return nil

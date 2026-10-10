@@ -2,8 +2,10 @@ package main
 
 import (
 	"log"
+	"os"
 
 	"github.com/gin-gonic/gin"
+	"github.com/joho/godotenv"
 
 	"payflow/internal/database"
 	"payflow/internal/handler"
@@ -12,10 +14,19 @@ import (
 )
 
 func main() {
-	databaseURL := "postgres://postgres:Bini%40postgres1@localhost:5432/PayFlow?sslmode=disable"
+	err := godotenv.Load()
+	if err := godotenv.Load(); err != nil {
+		log.Fatalf("Error loading .env file: %v", err)
+	}
+
+	databaseURL := os.Getenv("DATABASE_URL")
+	if databaseURL == "" {
+		log.Fatal("DATABASE_URL environment variable is not set")
+	}
+
 	db, err := database.Connect(databaseURL)
 	if err != nil {
-		log.Fatal(err)
+		log.Fatalf("Failed to connect to database: %v", err)
 	}
 	defer db.Close()
 
