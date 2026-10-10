@@ -23,7 +23,7 @@ func (s *MerchantService) GetAll() ([]model.Merchant, error) {
 }
 
 func (s *MerchantService) Create(req model.CreateMerchantRequest) (model.Merchant, error) {
-    if err := utils.ValidateRequired(req.BusinessName, "business_name"); err != nil {
+	if err := utils.ValidateRequired(req.BusinessName, "business_name"); err != nil {
 		return model.Merchant{}, err
 	}
 	if err := utils.ValidateRequired(req.BusinessType, "business_type"); err != nil {
@@ -39,13 +39,13 @@ func (s *MerchantService) Create(req model.CreateMerchantRequest) (model.Merchan
 		return model.Merchant{}, err
 	}
 
-	merchant := model.Merchant {
-		ID: uuid.New(),
-		BusinessName : req.BusinessName,
-		BusinessType : req.BusinessType,
-		OwnerName : req.OwnerName,
-		Phone : req.Phone,
-		Address : req.Address,
+	merchant := model.Merchant{
+		ID:           uuid.New(),
+		BusinessName: req.BusinessName,
+		BusinessType: req.BusinessType,
+		OwnerName:    req.OwnerName,
+		Phone:        req.Phone,
+		Address:      req.Address,
 	}
 
 	createdMerchant, err := s.repository.Create(merchant)
@@ -79,13 +79,13 @@ func (s *MerchantService) Update(id uuid.UUID, req model.CreateMerchantRequest) 
 		return model.Merchant{}, err
 	}
 
-	merchant := model.Merchant {
-		ID: id,
-		BusinessName : req.BusinessName,
-		BusinessType : req.BusinessType,
-		OwnerName : req.OwnerName,
-		Phone : req.Phone,
-		Address : req.Address,
+	merchant := model.Merchant{
+		ID:           id,
+		BusinessName: req.BusinessName,
+		BusinessType: req.BusinessType,
+		OwnerName:    req.OwnerName,
+		Phone:        req.Phone,
+		Address:      req.Address,
 	}
 
 	updatedMerchant, err := s.repository.Update(merchant)

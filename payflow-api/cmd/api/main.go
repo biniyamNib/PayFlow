@@ -31,29 +31,23 @@ func main() {
 	defer db.Close()
 
 	merchantRepository := repository.NewMerchantRepository(db)
-	merchantUserRepository := repository.NewMerchantUserRepository(db)
+	// merchantUserRepository := repository.NewMerchantUserRepository(db)
 
 	merchantService := service.NewMerchantService(
 		merchantRepository,
 	)
-	merchantUserService := service.NewMerchantUserService(
-		merchantUserRepository,
-	)
 
 	merchantHandler := handler.NewMerchantHandler(
 		merchantService,
-	)
-	merchantUserHandler := handler.NewMerchantUSerHandler(
-		merchantUserService,
 	)
 
 	r := gin.Default()
 
 	r.GET("/health", handler.Health)
 	r.GET("/api/v1/merchants", merchantHandler.GetAll)
-	r.POST("api/v1/merchants", merchantHandler.Create)	
+	r.POST("api/v1/merchants", merchantHandler.Create)
 	r.GET("api/v1/merchants/:id", merchantHandler.GetByID)
-    r.PUT("api/v1/merchants/:id", merchantHandler.Update)
+	r.PUT("api/v1/merchants/:id", merchantHandler.Update)
 	r.DELETE("api/v1/merchants/:id", merchantHandler.Delete)
 	r.PATCH("/api/v1/merchants/:id/activate", merchantHandler.Activate)
 

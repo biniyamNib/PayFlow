@@ -9,9 +9,9 @@ type MerchantUserRepository struct {
 	db DBExecutor
 }
 
-func NewMerchantUserRepository (db DBExecutor) *MerchantUserRepository {
+func NewMerchantUserRepository(db DBExecutor) *MerchantUserRepository {
 	return &MerchantUserRepository{
-		db:db,
+		db: db,
 	}
 }
 
@@ -43,4 +43,3 @@ func (r *MerchantUserRepository) Create(req model.MerchantUser) (model.MerchantU
 	return req, nil
 
 }
-

@@ -9,7 +9,7 @@ import (
 )
 
 type MerchantUserService struct {
-	db *sql.DB
+	db         *sql.DB
 	repository *repository.MerchantUserRepository
 }
 
@@ -32,18 +32,18 @@ func (s *MerchantUserService) Register(req model.RegisterMerchantRequest) (model
 		return model.MerchantUser{}, err
 	}
 
-	merchant_user := model.MerchantUser {
-		ID: uuid.New(),
-		Email: req.Email,
+	merchant_user := model.MerchantUser{
+		ID:           uuid.New(),
+		Email:        req.Email,
 		PasswordHash: hashedPassword,
 	}
 
 	createdMerchantUser, err := s.repository.Create(merchant_user)
 
-	 if err != nil {
+	if err != nil {
 		return model.MerchantUser{}, err
-	 }
+	}
 
-	 return createdMerchantUser, nil
+	return createdMerchantUser, nil
 
 }
