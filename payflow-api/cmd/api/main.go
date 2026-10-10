@@ -31,13 +31,20 @@ func main() {
 	defer db.Close()
 
 	merchantRepository := repository.NewMerchantRepository(db)
+	merchantUserRepository := repository.NewMerchantUserRepository(db)
 
 	merchantService := service.NewMerchantService(
 		merchantRepository,
 	)
+	merchantUserService := service.NewMerchantUserService(
+		merchantUserRepository,
+	)
 
 	merchantHandler := handler.NewMerchantHandler(
 		merchantService,
+	)
+	merchantUserHandler := handler.NewMerchantUSerHandler(
+		merchantUserService,
 	)
 
 	r := gin.Default()

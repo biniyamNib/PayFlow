@@ -1,6 +1,7 @@
 package service
 
 import (
+	"database/sql"
 	"payflow/internal/model"
 	"payflow/internal/repository"
 	"payflow/internal/utils"
@@ -8,12 +9,13 @@ import (
 )
 
 type MerchantUserService struct {
+	db *sql.DB
 	repository *repository.MerchantUserRepository
 }
 
-func NewMerchantUserService(repo *repository.MerchantUserRepository) *MerchantUserService {
+func NewMerchantUserService(db *sql.DB) *MerchantUserService {
 	return &MerchantUserService{
-		repository: repo,
+		db: db,
 	}
 }
 

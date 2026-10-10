@@ -3,18 +3,19 @@ package repository
 import (
 	"database/sql"
 	"errors"
-	"uuid"
 	"fmt"
+	"uuid"
 
 	"payflow/internal/model"
 )
+
 type MerchantRepository struct {
 	db DBExecutor
 }
 
 func NewMerchantRepository(db DBExecutor) *MerchantRepository {
 	return &MerchantRepository{
-		db:db,
+		db: db,
 	}
 }
 
@@ -27,21 +28,21 @@ func (r *MerchantRepository) GetAll() ([]model.Merchant, error) {
 	`
 
 	rows, err := r.db.Query(query)
-    if err != nil {
+	if err != nil {
 		return nil, err
 	}
-    defer rows.Close()
+	defer rows.Close()
 
 	var merchants []model.Merchant
 
-	for rows.Next(){
+	for rows.Next() {
 		var merchant model.Merchant
 		err := rows.Scan(
 			&merchant.ID,
 			&merchant.BusinessName,
 			&merchant.BusinessType,
 			&merchant.OwnerName,
-            &merchant.Phone,
+			&merchant.Phone,
 			&merchant.Address,
 			&merchant.Status,
 		)
@@ -101,8 +102,8 @@ func (r *MerchantRepository) GetByID(id uuid.UUID) (model.Merchant, error) {
 
 	row := r.db.QueryRow(query, id)
 
-    var merchant model.Merchant
-	
+	var merchant model.Merchant
+
 	err := row.Scan(
 		&merchant.ID,
 		&merchant.BusinessName,
@@ -111,7 +112,7 @@ func (r *MerchantRepository) GetByID(id uuid.UUID) (model.Merchant, error) {
 		&merchant.Phone,
 		&merchant.Address,
 		&merchant.Status,
-	)	
+	)
 
 	if err != nil {
 		if errors.Is(err, sql.ErrNoRows) {
@@ -119,10 +120,10 @@ func (r *MerchantRepository) GetByID(id uuid.UUID) (model.Merchant, error) {
 		}
 		return model.Merchant{}, fmt.Errorf("get merchant: %w", err)
 	}
-	
+
 	return merchant, nil
 
-} 
+}
 
 func (r *MerchantRepository) Update(merchant model.Merchant) (model.Merchant, error) {
 	query := `
@@ -131,7 +132,7 @@ func (r *MerchantRepository) Update(merchant model.Merchant) (model.Merchant, er
 	WHERE id = $6
 	`
 	result, err := r.db.Exec(
-		query, 
+		query,
 		merchant.BusinessName,
 		merchant.BusinessType,
 		merchant.OwnerName,
@@ -144,13 +145,12 @@ func (r *MerchantRepository) Update(merchant model.Merchant) (model.Merchant, er
 		return model.Merchant{}, fmt.Errorf("update merchant: %w", err)
 	}
 
-	rowsAffected, err := result.RowsAffected(); 
+	rowsAffected, err := result.RowsAffected()
 
 	if err != nil {
 		return model.Merchant{}, fmt.Errorf("update merchant: %w", err)
 	}
 
-	
 	if rowsAffected == 0 {
 		return model.Merchant{}, ErrMerchantNotFound
 	}
@@ -171,12 +171,12 @@ func (r *MerchantRepository) Delete(id uuid.UUID) error {
 		return fmt.Errorf("deactivate merchant: %w", err)
 	}
 
-    rowsAffected, err := result.RowsAffected();
+	rowsAffected, err := result.RowsAffected()
 	if err != nil {
 		return fmt.Errorf("deactivate merchant: %w", err)
 	}
 
-	if rowsAffected == 0 { 
+	if rowsAffected == 0 {
 		return ErrMerchantNotFound
 	}
 
@@ -184,29 +184,29 @@ func (r *MerchantRepository) Delete(id uuid.UUID) error {
 }
 
 func (r *MerchantRepository) Activate(id uuid.UUID) error {
-	
+
 	query := `
 	UPDATE merchants 
 	SET status = 'ACTIVE'
 	WHERE id = $1 AND status = 'INACTIVE'
 	`
 
-	result, err := r.db.Exec(query,id)
-
-	if err != nil {
-		return  fmt.Errorf("activate merchant: %w", err)
-	}
-
-	rowsAffected, err := result.RowsAffected() 
+	result, err := r.db.Exec(query, id)
 
 	if err != nil {
 		return fmt.Errorf("activate merchant: %w", err)
 	}
 
-	if rowsAffected == 0 { 
+	rowsAffected, err := result.RowsAffected()
+
+	if err != nil {
+		return fmt.Errorf("activate merchant: %w", err)
+	}
+
+	if rowsAffected == 0 {
 		return ErrMerchantNotFound
 	}
 
 	return nil
-	
+
 }

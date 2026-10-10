@@ -1,16 +1,15 @@
 package repository
 
 import (
-	"database/sql"
 	"fmt"
 	"payflow/internal/model"
 )
 
 type MerchantUserRepository struct {
-	db *sql.DB
+	db DBExecutor
 }
 
-func NewMerchantUserRepository (db *sql.DB) *MerchantUserRepository {
+func NewMerchantUserRepository (db DBExecutor) *MerchantUserRepository {
 	return &MerchantUserRepository{
 		db:db,
 	}
