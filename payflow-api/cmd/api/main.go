@@ -42,12 +42,13 @@ func main() {
 
 	r.GET("/health", handler.Health)
 	r.GET("/api/v1/merchants", merchantHandler.GetAll)
-	r.POST("api/v1/merchants", merchantHandler.Create)
-	r.GET("api/v1/merchants/:id", merchantHandler.GetByID)
-	r.PUT("api/v1/merchants/:id", merchantHandler.Update)
-	r.DELETE("api/v1/merchants/:id", merchantHandler.Delete)
+	r.POST("/api/v1/merchants", merchantHandler.Create)
+	r.GET("/api/v1/merchants/:id", merchantHandler.GetByID)
+	r.PUT("/api/v1/merchants/:id", merchantHandler.Update)
+	r.DELETE("/api/v1/merchants/:id", merchantHandler.Delete)
 	r.PATCH("/api/v1/merchants/:id/activate", merchantHandler.Activate)
-	r.POST("api/v1/merchant-users/register", merchantUserHandler.Register)
+	r.POST("/api/v1/merchant-users/register", merchantUserHandler.Register)
+	r.POST("/api/v1/merchant-users/login", merchantUserHandler.Login)
 
 	log.Println("PayFlow API running on :8080")
 

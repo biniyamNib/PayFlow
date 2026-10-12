@@ -91,24 +91,37 @@ func (s *MerchantUserService) Register(req model.RegisterMerchantRequest) (model
 	return createdMerchantUser, nil
 }
 
-func (s *MerchantUserService) Login(email, password string) (model.MerchantUser, error) {
+func (s *MerchantUserService) Login(email, password string) (model.LoginResponse, error) {
 	if err := utils.ValidateRequired(email, "email"); err != nil {
-		return model.MerchantUser{}, err
+		return model.LoginResponse{}, err
 	}
 	if err := utils.ValidateRequired(password, "password"); err != nil {
-		return model.MerchantUser{}, err
+		return model.LoginResponse{}, err
 	}
 
 	merchantUserRepository := repository.NewMerchantUserRepository(s.db)
 	merchantUser, err := merchantUserRepository.GetByEmail(email)
 
 	if err != nil {
-		return model.MerchantUser{}, ErrInvalidCredentials
+		return model.LoginResponse{}, ErrInvalidCredentials
 	}
 	if err := utils.CheckPassword(password, merchantUser.PasswordHash); err != nil {
-		return model.MerchantUser{}, ErrInvalidCredentials
+		return model.LoginResponse{}, ErrInvalidCredentials
 	}
 
-	return merchantUser, nil
+	token, err := utils.GenerateToken(
+		merchantUser.ID.String(),
+		merchantUser.MerchantID.String(),
+		merchantUser.Role,
+	)
+
+	if err != nil {
+		return model.LoginResponse{}, nil
+	}
+
+	return model.LoginResponse{
+		Token: token,
+		User:  merchantUser,
+	}, nil
 
 }
