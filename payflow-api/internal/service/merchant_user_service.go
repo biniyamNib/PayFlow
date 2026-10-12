@@ -1,6 +1,7 @@
 package service
 
 import (
+	"context"
 	"database/sql"
 	"payflow/internal/model"
 	"payflow/internal/repository"
@@ -20,6 +21,18 @@ func NewMerchantUserService(db *sql.DB) *MerchantUserService {
 }
 
 func (s *MerchantUserService) Register(req model.RegisterMerchantRequest) (model.MerchantUser, error) {
+	if err := utils.ValidateRequired(req.BusinessName, "business_name"); err != nil {
+		return model.MerchantUser{}, err
+	}
+	if err := utils.ValidateRequired(req.BusinessType, "business_type"); err != nil {
+		return model.MerchantUser{}, err
+	}
+	if err := utils.ValidateRequired(req.OwnerName, "owner_name"); err != nil {
+		return model.MerchantUser{}, err
+	}
+	if err := utils.ValidateRequired(req.Phone, "phone"); err != nil {
+		return model.MerchantUser{}, err
+	}
 	if err := utils.ValidateRequired(req.Email, "email"); err != nil {
 		return model.MerchantUser{}, err
 	}
@@ -32,18 +45,45 @@ func (s *MerchantUserService) Register(req model.RegisterMerchantRequest) (model
 		return model.MerchantUser{}, err
 	}
 
-	merchant_user := model.MerchantUser{
+	tx, err := s.db.BeginTx(context.Background(), nil)
+	if err != nil {
+		return model.MerchantUser{}, err
+	}
+	defer tx.Rollback()
+
+	merchantRepository := repository.NewMerchantRepository(tx)
+	merchantUserRepository := repository.NewMerchantUserRepository(tx)
+
+	merchant := model.Merchant{
 		ID:           uuid.New(),
-		Email:        req.Email,
-		PasswordHash: hashedPassword,
+		BusinessName: req.BusinessName,
+		BusinessType: req.BusinessType,
+		OwnerName:    req.OwnerName,
+		Phone:        req.Phone,
+		Address:      req.Address,
 	}
 
-	createdMerchantUser, err := s.repository.Create(merchant_user)
-
+	createdMerchant, err := merchantRepository.Create(merchant)
 	if err != nil {
 		return model.MerchantUser{}, err
 	}
 
-	return createdMerchantUser, nil
+	merchantUser := model.MerchantUser{
+		ID:           uuid.New(),
+		MerchantID:   createdMerchant.ID,
+		Email:        req.Email,
+		PasswordHash: hashedPassword,
+		Role:         "OWNER",
+	}
 
+	createdMerchantUser, err := merchantUserRepository.Create(merchantUser)
+	if err != nil {
+		return model.MerchantUser{}, err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return model.MerchantUser{}, err
+	}
+
+	return createdMerchantUser, nil
 }

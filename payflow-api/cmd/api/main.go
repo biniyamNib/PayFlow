@@ -31,15 +31,12 @@ func main() {
 	defer db.Close()
 
 	merchantRepository := repository.NewMerchantRepository(db)
-	// merchantUserRepository := repository.NewMerchantUserRepository(db)
 
-	merchantService := service.NewMerchantService(
-		merchantRepository,
-	)
+	merchantService := service.NewMerchantService(merchantRepository,)
+	merchantUserervice := service.NewMerchantUserService(db)
 
-	merchantHandler := handler.NewMerchantHandler(
-		merchantService,
-	)
+	merchantHandler := handler.NewMerchantHandler(merchantService,)
+	merchantUserHandler := handler.NewMerchantUserHandler(merchantUserervice,)
 
 	r := gin.Default()
 
@@ -50,6 +47,7 @@ func main() {
 	r.PUT("api/v1/merchants/:id", merchantHandler.Update)
 	r.DELETE("api/v1/merchants/:id", merchantHandler.Delete)
 	r.PATCH("/api/v1/merchants/:id/activate", merchantHandler.Activate)
+	r.POST("api/v1/merchant-users/register", merchantUserHandler.Register)
 
 	log.Println("PayFlow API running on :8080")
 

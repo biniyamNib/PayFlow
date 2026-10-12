@@ -2,7 +2,10 @@ package repository
 
 import (
 	"fmt"
+	"errors"
+	"database/sql"
 	"payflow/internal/model"
+
 )
 
 type MerchantUserRepository struct {
@@ -41,5 +44,36 @@ func (r *MerchantUserRepository) Create(req model.MerchantUser) (model.MerchantU
 	}
 
 	return req, nil
+
+}
+
+func (r *MerchantUserRepository) GetByEmail (email string) (model.MerchantUser, error) {
+	query := `
+	SELECT id, merchant_id, email, password_hash, role, created_at
+	FROM merchant_users
+	WHERE email = $1
+	`
+	row := r.db.QueryRow(query, email)
+
+	var merchantUser model.MerchantUser
+
+	err := row.Scan(
+		&merchantUser.ID,
+		&merchantUser.MerchantID,
+		&merchantUser.Email,
+		&merchantUser.PasswordHash,
+		&merchantUser.Role,
+		&merchantUser.CreatedAt,
+	)
+
+	
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return model.MerchantUser{}, ErrMerchantUserNotFound
+		}
+		return model.MerchantUser{}, fmt.Errorf("get merchant user by email: %w", err)
+	}
+
+	return merchantUser, nil
 
 }
