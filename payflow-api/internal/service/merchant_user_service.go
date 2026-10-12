@@ -3,11 +3,14 @@ package service
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"payflow/internal/model"
 	"payflow/internal/repository"
 	"payflow/internal/utils"
 	"uuid"
 )
+
+var ErrInvalidCredentials = errors.New("invalid email or password")
 
 type MerchantUserService struct {
 	db         *sql.DB
@@ -86,4 +89,26 @@ func (s *MerchantUserService) Register(req model.RegisterMerchantRequest) (model
 	}
 
 	return createdMerchantUser, nil
+}
+
+func (s *MerchantUserService) Login(email, password string) (model.MerchantUser, error) {
+	if err := utils.ValidateRequired(email, "email"); err != nil {
+		return model.MerchantUser{}, err
+	}
+	if err := utils.ValidateRequired(password, "password"); err != nil {
+		return model.MerchantUser{}, err
+	}
+
+	merchantUserRepository := repository.NewMerchantUserRepository(s.db)
+	merchantUser, err := merchantUserRepository.GetByEmail(email)
+
+	if err != nil {
+		return model.MerchantUser{}, ErrInvalidCredentials
+	}
+	if err := utils.CheckPassword(password, merchantUser.PasswordHash); err != nil {
+		return model.MerchantUser{}, ErrInvalidCredentials
+	}
+
+	return merchantUser, nil
+
 }
