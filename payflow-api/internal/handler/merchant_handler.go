@@ -199,3 +199,11 @@ func (h *MerchantHandler) Activate(c *gin.Context) {
 	})
 
 }
+
+
+func (h *MerchantHandler) Me(c *gin.Context) {
+	merchantID, err := c.Get("merchant_id")
+	if err != nil {
+		
+	}
+}

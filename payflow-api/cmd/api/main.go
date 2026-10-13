@@ -2,6 +2,7 @@ package main
 
 import (
 	"log"
+	"net/http"
 	"os"
 
 	"github.com/gin-gonic/gin"
@@ -9,12 +10,12 @@ import (
 
 	"payflow/internal/database"
 	"payflow/internal/handler"
+	"payflow/internal/middleware"
 	"payflow/internal/repository"
 	"payflow/internal/service"
 )
 
 func main() {
-	err := godotenv.Load()
 	if err := godotenv.Load(); err != nil {
 		log.Fatalf("Error loading .env file: %v", err)
 	}
@@ -49,6 +50,12 @@ func main() {
 	r.PATCH("/api/v1/merchants/:id/activate", merchantHandler.Activate)
 	r.POST("/api/v1/merchant-users/register", merchantUserHandler.Register)
 	r.POST("/api/v1/merchant-users/login", merchantUserHandler.Login)
+
+	r.GET("/api/v1/protected", middleware.AuthMiddleware(), func(c *gin.Context) {
+		c.JSON(http.StatusOK, gin.H {
+			"message": "You are authenticated",
+		})
+	})
 
 	log.Println("PayFlow API running on :8080")
 
