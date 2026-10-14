@@ -44,10 +44,9 @@ func main() {
 	r.GET("/health", handler.Health)
 	r.GET("/api/v1/merchants", merchantHandler.GetAll)
 	r.POST("/api/v1/merchants", merchantHandler.Create)
-	r.GET("/api/v1/merchants/:id", merchantHandler.GetByID)
-	r.PUT("/api/v1/merchants/:id", merchantHandler.Update)
-	r.DELETE("/api/v1/merchants/:id", merchantHandler.Delete)
-	r.PATCH("/api/v1/merchants/:id/activate", merchantHandler.Activate)
+	r.GET("/api/v1/merchants/:id", middleware.AuthMiddleware(), merchantHandler.GetByID)
+	r.PUT("/api/v1/merchants/:id", middleware.AuthMiddleware(), middleware.RequireRole("OWNER"), merchantHandler.Update)
+	r.PATCH("/api/v1/merchants/:id/activate", middleware.AuthMiddleware(), middleware.RequireRole("OWNER"), merchantHandler.Activate)
 	r.POST("/api/v1/merchant-users/register", merchantUserHandler.Register)
 	r.POST("/api/v1/merchant-users/login", merchantUserHandler.Login)
 
@@ -56,6 +55,15 @@ func main() {
 			"message": "You are authenticated",
 		})
 	})
+	r.GET("/api/v1/me", middleware.AuthMiddleware(), merchantHandler.Me)
+	r.DELETE("/api/v1/merchants/:id", middleware.AuthMiddleware(), middleware.RequireRole("OWNER"), merchantHandler.Delete)
+	r.GET("/api/v1/owner-only", middleware.AuthMiddleware(), middleware.RequireRole("OWNER"),
+		func(c *gin.Context) {
+			c.JSON(http.StatusOK, gin.H{
+				"message": "Welcome, OWNER",
+			})
+		},
+	)
 
 	log.Println("PayFlow API running on :8080")
 

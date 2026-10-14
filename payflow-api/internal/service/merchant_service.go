@@ -4,9 +4,12 @@ import (
 	"payflow/internal/model"
 	"payflow/internal/repository"
 	"uuid"
+	"errors"
 
 	"payflow/internal/utils"
 )
+
+var ErrForbidden = errors.New("you cannot update another merchant")
 
 type MerchantService struct {
 	repository *repository.MerchantRepository
@@ -62,7 +65,11 @@ func (s *MerchantService) GetByID(id uuid.UUID) (model.Merchant, error) {
 	return s.repository.GetByID(id)
 }
 
-func (s *MerchantService) Update(id uuid.UUID, req model.CreateMerchantRequest) (model.Merchant, error) {
+func (s *MerchantService) Update(id uuid.UUID, authenticatedMerchantID uuid.UUID, 
+	req model.CreateMerchantRequest) (model.Merchant, error) {
+	if id != authenticatedMerchantID {
+		return model.Merchant{}, ErrForbidden
+	}
 	if err := utils.ValidateRequired(req.BusinessName, "business_name"); err != nil {
 		return model.Merchant{}, err
 	}
